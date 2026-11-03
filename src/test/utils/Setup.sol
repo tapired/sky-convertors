@@ -27,6 +27,7 @@ abstract contract Setup is Test, IEvents {
     address public constant DAI_USDS = 0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A;
     address public constant PSM = 0xf6e72Db5454dd049d0788e411b06CfAF16853042;
     address public constant LITE_PSM_WRAPPER = 0xA188EEC8F81263234dA3622A406892F3D630f98c;
+    address public constant PAUSE_PROXY = 0xBE8E3e3618f7474F8cB1d074A26afFef007E98FB;
 
     ERC20 public usdc;
     ERC20 public usds;

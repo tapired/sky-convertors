@@ -11,6 +11,7 @@ interface ILitePSMWrapper {
 interface IPSM {
     function tin() external view returns (uint256);
     function tout() external view returns (uint256);
+    function file(bytes32 what, uint256 data) external;
 }
 
 interface IDaiUsds {
