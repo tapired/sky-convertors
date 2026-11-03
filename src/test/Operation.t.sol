@@ -68,6 +68,31 @@ abstract contract ConverterBehaviorTest is Setup {
         assertEq(strategy.availableDepositLimit(user), 0, "!feeDepositLimit");
     }
 
+    function test_withdrawerPaysPsmFee(uint256 amount, bool looseBalance) public {
+        amount = _boundAmount(amount);
+
+        mintAndDepositIntoStrategy(strategy, user, amount);
+
+        if (looseBalance) {
+            vm.prank(management);
+            strategy.manualRedeem(type(uint256).max);
+        }
+
+        uint256 fee = 1e15;
+        vm.prank(PAUSE_PROXY);
+        IPSM(PSM).file(address(asset) == USDC ? bytes32("tout") : bytes32("tin"), fee);
+
+        uint256 shares = strategy.maxRedeem(user);
+        // Redeem half, so the loose balance left behind could have paid the fee.
+        if (looseBalance) shares /= 2;
+        uint256 expected = strategy.previewRedeem(shares);
+        vm.prank(user);
+        uint256 withdrawn = strategy.redeem(shares, user, user, MAX_BPS);
+
+        assertApproxEqRel(withdrawn, (expected * (1e18 - fee)) / 1e18, 1e13, "!feePaid");
+        assertEq(asset.balanceOf(user), withdrawn, "!assetOut");
+    }
+
     function test_manualRedeemAndPsmSwap() public {
         mintAndDepositIntoStrategy(strategy, user, 1_000 * 10 ** asset.decimals());
 

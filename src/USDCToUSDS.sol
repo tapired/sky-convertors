@@ -20,6 +20,7 @@ contract USDCToUSDS is BaseHealthCheck {
     address public immutable VAULT;
 
     uint256 public constant SCALE = 1e12;
+    uint256 internal constant WAD = 1e18;
 
     constructor(address _vault, string memory _name) BaseHealthCheck(USDC, _name) {
         require(IERC4626(_vault).asset() == USDS, "!vault asset");
@@ -59,7 +60,8 @@ contract USDCToUSDS is BaseHealthCheck {
             _redeemFromVault(usdsNeeded - looseUsds);
         }
 
-        uint256 gemAmount = _min(_amount, ERC20(USDS).balanceOf(address(this)) / SCALE);
+        uint256 usdsToSpend = _min(usdsNeeded, ERC20(USDS).balanceOf(address(this)));
+        uint256 gemAmount = (usdsToSpend * WAD) / ((WAD + IPSM(PSM).tout()) * SCALE);
         if (gemAmount == 0) return;
 
         ILitePSMWrapper(LITE_PSM_WRAPPER).buyGem(address(this), gemAmount);
